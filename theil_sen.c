@@ -71,7 +71,7 @@ void theil_sen(float*x, float*y, float* res, size_t n){
 	float* intercepts = (float*)malloc(n*sizeof(float));
 
 	// Malloc aligned memory before intercept
-	int align_size = ((n+7)/8)*8;
+	size_t align_size = ((n+7)/8)*8;
 	float* x_align = align_malloc(align_size);
 	float* y_align = align_malloc(align_size);
 	memcpy(x_align, x, n*sizeof(float));
@@ -87,10 +87,10 @@ void theil_sen(float*x, float*y, float* res, size_t n){
 	float beta = median(slopes, n*(n-1)/2);
 	
 	// Compute the intercepts
-	int idx = 0;
+	size_t idx = 0;
 	float* tmp = align_malloc(8); // notice !!
 	__m256 slope_vec = _mm256_set1_ps(beta);
-	int n_vec = (n/8)*8;
+	size_t n_vec = (n/8)*8;
 	for(size_t i = 0; i < n_vec; i+=8){
 		__m256 x_vec = _mm256_load_ps(&x_align[i]);
 		__m256 y_vec = _mm256_load_ps(&y_align[i]);
@@ -113,4 +113,49 @@ void theil_sen(float*x, float*y, float* res, size_t n){
 	free(tmp);
 	res[0] = alpha;
 	res[1] = beta;
+}
+
+void theil_sen_window(float*y, float* res, size_t n, size_t win_size){
+ 	size_t n_windows = (n + win_size-1)/win_size;
+
+ 	// First malloc the x array
+ 	size_t align_size = ((win_size + 7)/8)*8;
+ 	float* x_window_align = align_malloc(align_size);
+ 	for(size_t i = 0; i < win_size; i++)x_window_align[i] = (float)i;
+	for(size_t i = win_size; i < align_size; i++)x_window_align[i] = 0.0f;
+
+	// Sliding window and regression storage
+	float* regression_result = (float*)malloc(2*sizeof(float));
+	for(size_t w = 0; w < n_windows; w++){
+		// Locate the sliding window position
+		size_t start_idx = w*win_size;
+		size_t end_idx = start_idx + win_size;
+		if(end_idx > n)end_idx = n;
+
+		// Compute the theil_sen estimator
+		size_t current_win_size = end_idx - start_idx;
+		float* y_window = &y[start_idx];
+		if(current_win_size >= 2){
+			theil_sen(x_window_align, y_window, regression_result, current_win_size);
+			float alpha = regression_result[0];
+			float beta = regression_result[1];
+
+			// Compute the baseline value
+			__m256 alpha_vec = _mm256_set1_ps(alpha);
+			__m256 beta_vec = _mm256_set1_ps(beta);
+			size_t n_vec = (current_win_size/8)*8;
+			for(size_t i = 0; i < n_vec; i+=8){
+				__m256 x_vec = _mm256_load_ps(&x_window_align[i]);
+				__m256 tmp = _mm256_mul_ps(beta_vec, x_vec);
+				__m256 b_vec = _mm256_add_ps(tmp, alpha_vec);
+				_mm256_storeu_ps(&res[start_idx + i], b_vec); // This memory address may not be aligned address
+			}
+
+			// Dealing with the remaining elements
+			for(size_t i = n_vec; i < current_win_size; i++)res[start_idx+i] = alpha + beta*x_window_align[i];
+		}
+		else res[start_idx] = y_window[0];
+	}
+  free(x_window_align);
+  free(regression_result);
 }
