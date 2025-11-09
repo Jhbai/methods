@@ -59,7 +59,7 @@ class Gemma3Object:
         MSG = self.msg.format(prompt=prompt)
         input_ids = torch.tensor(tokenizer.encode(MSG)).to(model.device)
         input_ids = input_ids.unsqueeze(0)
-        eos_token_ids = [tokenizer.eos_token_id]
+        eos_token_ids = [tokenizer.eos_token_id, 106]
 
         # ----- Prefill ----- #
         chunks = torch.split(input_ids[:, :-1], 32, dim=-1)
