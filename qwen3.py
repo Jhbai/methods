@@ -25,7 +25,7 @@ class CacheObject:
 
     
 
-class QwenObject:
+class Qwen3Object:
     def __init__(self, path = "./Qwen3-8B", history_len = 32):
         # ----- Load Qwen Model ----- #
         quantization_config = BitsAndBytesConfig(
