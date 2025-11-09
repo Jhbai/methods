@@ -16,3 +16,7 @@ This is the method for solving every problems, most of my repos will be merged h
 000006_chromadb
 
 000007_standard_sql_in_python
+
+000008_memto
+
+000009_llm_func_in_python
