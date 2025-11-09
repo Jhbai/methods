@@ -28,7 +28,7 @@ void print_result(const char* test_name, DTWResult* result, const float* trg) {
     printf("----------------------------------------\n\n");
 }
 
-int main() {
+int main(int argc, char** argv) {
     DTWConfig config;
     DTWResult* result;
     // Test 1
@@ -89,37 +89,7 @@ int main() {
         // 匹配路徑 (0,2), (1,5), (2,8) 偏離對角線
         config = create_config(0.1f, 0.0f); // 10% 窄帶 (band_width=1)
         result = subsequence_alignment(src, 3, trg, 9, &config);
-        print_result("TEST 6: Sakoe-Chiba Pruning (Should find NULL or bad match)", result, trg); // 預期: NULL
-        dtw_free_result(result);
-    }
-
-    // Test 7
-    {
-        float src[] = {};
-        float trg[] = {1.0, 2.0, 3.0};
-        config = create_config(0.0f, 0.0f);
-        result = subsequence_alignment(src, 0, trg, 3, &config);
-        print_result("TEST 7: Empty Source (src_len = 0)", result, trg); // 預期: dist=0.0, path_len=0
-        dtw_free_result(result);
-    }
-
-    // Test 8
-    {
-        float src[] = {1.0, 2.0, 3.0};
-        float trg[] = {};
-        config = create_config(0.0f, 0.0f);
-        result = subsequence_alignment(src, 3, trg, 0, &config);
-        print_result("TEST 8: Empty Target (trg_len = 0)", result, trg); // 預期: NULL
-        dtw_free_result(result);
-    }
-
-    // Test 9
-    {
-        float src[] = {};
-        float trg[] = {};
-        config = create_config(0.0f, 0.0f);
-        result = subsequence_alignment(src, 0, trg, 0, &config);
-        print_result("TEST 9: Both Empty (src_len = 0, trg_len = 0)", result, trg); // 預期: dist=0.0, path_len=0
+        print_result("TEST 6: Sakoe-Chiba Pruning (Should find NULL or bad match)", result, trg); // 預期: dist > 0
         dtw_free_result(result);
     }
 

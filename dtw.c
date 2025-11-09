@@ -33,7 +33,7 @@ static int is_in_band(int i, int j, int src_len, int trg_len, float band_ratio){
 
     // Compute the expectation position on the diagnosis
     float expected_j = (float)i * trg_len / src_len;
-    return abs(j - (int)expected_j) <= band_width;
+    return fabsf((float)j - expected_j) <= band_width;
 }
 
 void dtw_free_result(DTWResult* result) {
@@ -68,20 +68,19 @@ static DTWResult* dtw_distance(const float* src, const float* trg, size_t src_le
         int valid = 0;
         for(size_t j = 1; j <= win_len; j++){
             // Check whether out of band
-            if(!is_in_band(i-1, j-1, src_len, end - start + 1, config->sakoe_chiba_band)) continue; // [strcture entity] S.x; [structure] S->x
+            if(!is_in_band(i-1, j-1, src_len, win_len, config->sakoe_chiba_band)) continue; // [strcture entity] S.x; [structure] S->x
 
             // Compute the cost
             float dist = euclidean_distance(src[i-1], trg[start+j-1]);
             float prev_min = min3(cost[i-1][j], cost[i][j-1], cost[i-1][j-1]);
             if(prev_min != FLT_MAX){
-                cost[i][j] = dist + prev_min;
-                valid = 1;
-                // If cost is too big(threshold defined beforehand), then discard this decision
-                if(config->threshold > 0){
-                    if(cost[i][j] > config->threshold){
-                        cost[i][j] = FLT_MAX;
-                        valid = 0;
-                    }
+                float curr_cost = dist + prev_min;
+                
+                // Check threshold
+                if(config->threshold > 0 && curr_cost > config->threshold)cost[i][j] = FLT_MAX;
+                else {
+                    cost[i][j] = curr_cost;
+                    valid = 1;
                 }
             }
         }
@@ -172,7 +171,7 @@ DTWResult* subsequence_alignment(const float* src, size_t src_len, const float* 
         for(size_t start = 0; start <= trg_len - i; start++){
             size_t end = start + i - 1;
             DTWResult* result = dtw_distance(src, trg, src_len, start, end, config);
-            if(result && result->distance < best_distance){
+            if(result && result->distance <= best_distance){
                 if(best_result) dtw_free_result(best_result);
                 best_result = result;
                 best_distance = result->distance;
