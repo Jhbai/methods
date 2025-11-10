@@ -41,7 +41,7 @@ def initialize_memory_with_kmeans(model, data_loader, num_clusters, device):
         centroids = torch.tensor(kmeans.cluster_centers_, dtype=torch.float32).to(device)
         model.memory_module.memory.data = centroids
 
-def phase2_full_training(model, train_loader, optimizer, loss_fn, epochs, device)
+def phase2_full_training(model, train_loader, optimizer, loss_fn, epochs, device):
     model.to(device)
     for epoch in range(1, 1+epochs):
         model.train()
