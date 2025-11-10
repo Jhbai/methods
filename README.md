@@ -1,28 +1,67 @@
---- 
-This is the method for solving every problems, most of my repos will be merged here to be a toolkit box.
+---
 
-# [branch list]
+# 曼德博集合計算效能比較
 
-000001_dtw_in_c
+本專案旨在實現並比較三種不同方法計算曼德博集合（Mandelbrot set）的效能，包含：
+1.  **序列執行 (Serial)**：單一執行緒循序運算。
+2.  **多執行緒 (Multi-threading)**：使用 Pthreads 進行共享記憶體平行運算。
+3.  **多行程 (Multi-processing)**：使用 MPI (Message Passing Interface) 進行分散式記憶體平行運算。
 
-000002_pelt_in_c
+## 程式碼說明
 
-000003_theil_sen_in_c
+此專案包含三個 C 語言程式檔案，各自代表一種實現方式。
 
-000004_mannkandell_in_c
+### `serial.c`
+此為基準版本，使用單一 CPU 核心進行序列計算。它會逐一計算 1000x1000 圖像中的每一個像素點，並記錄總花費時間。
 
-000005_c_code_integration_in_cython
+### `thread.c`
+此版本使用 POSIX Threads (pthreads) 函式庫，將計算任務分配給 4 個執行緒。執行緒們共享同一個任務佇列（即圖像的列），並使用互斥鎖（Mutex）來確保每次只有一個執行緒能取得新的任務，以避免重複計算。這種方法適用於多核心處理器的單一機器上。
 
-000006_chromadb
+### `process.c`
+此版本使用 MPI (Message Passing Interface) 函式庫，這是一種常用於高效能計算（HPC）的標準。程式會將圖像的列（rows）平均分配給指定的行程（processes）數量，每個行程在各自的記憶體空間中獨立計算被分配到的部分。這種方法不僅適用於單機多核心，也能擴展到多台機器組成的叢集上。
 
-000007_standard_sql_in_python
+## 編譯與執行
 
-000008_memto
+### 編譯指令
+```bash
+# 編譯 Serial 版本
+gcc serial.c -o serial -lm
 
-000009_llm_func_in_python
+# 編譯 Thread 版本
+gcc thread.c -o thread -lpthread -lm
 
-00010_peaks_over_threshold_in_python
+# 編譯 Process 版本 (需已安裝 MPI)
+mpicc process.c -o process -lm
+```
 
-00011_armv7
+### 執行指令
+```bash
+# 執行 Serial 版本
+./serial
 
-00012_fastapi_with_async_and_stream
+# 執行 Thread 版本
+./thread
+
+# 執行 Process 版本 (以 4 個行程為例)
+mpirun -np 4 ./process
+```
+
+## 效能結果
+
+根據提供的執行結果圖片，三種方法的效能表現如下：
+
+| 執行方式 | 所需時間 (秒) |
+| :--- | :--- |
+| `[serial]` | 4.487613 |
+| `[thread]` | 1.117575 |
+| `[process]`| 2.245732 |
+
+## 結果分析
+
+1.  **平行化顯著提昇效能**：與序列版本（4.48 秒）相比，多執行緒（1.11 秒）和多行程（2.24 秒）版本都大幅縮短了運算時間，證明了平行計算在處理這類可分割任務上的優勢。
+
+2.  **多執行緒 vs. 多行程**：
+    *   在此次測試中，**多執行緒 (`thread.c`) 的效能最佳**。這通常是因為在單一機器上，執行緒的創建與情境切換（Context Switch）的成本比行程來得低。此外，執行緒間透過共享記憶體溝通，無需像 MPI 那樣進行額外的訊息傳遞，因此延遲更低。
+    *   多行程 (`process.c`) 的版本雖然比序列快，但比多執行緒慢。其 2.24 秒的執行時間大約是序列版本的一半，這暗示了該次測試可能是使用 2 個行程執行的 (`mpirun -np 2 ./process`)。若使用 4 個行程，其效能應會更接近多執行緒版本，但仍可能因行程創建和通訊的額外開銷而略慢一些。
+
+總結來說，對於單機上的密集型運算，多執行緒通常是更輕量且高效的選擇。而 MPI 的優勢則在於其強大的擴展性，能將運算規模擴展至數百甚至數千個處理器核心的計算叢集。
