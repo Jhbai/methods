@@ -37,7 +37,7 @@ class GatedMemoryModule(nn.Module):
         attn_w = F.softmax(attn_scores_w / self.temperature, dim=2)
         retrieved_memory = torch.matmul(attn_w, self.memory)
         updated_queries = torch.cat([queries, retrieved_memory], dim=2)
-        return updated_queries
+        return updated_queries, attn_w
     
     def forward(self, queries: torch.Tensor) -> torch.Tensor:
         return self.query_update(queries)
