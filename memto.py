@@ -1,5 +1,8 @@
 import torch
 import torch.nn as nn
+from encoder import *
+from decoder import *
+from memory_gate import *
 
 class MEMTO(nn.Module):
     """MEMTO Structure"""
