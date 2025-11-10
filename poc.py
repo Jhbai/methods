@@ -1,3 +1,7 @@
+import numpy as np
+import pandas as pd
+from scipy import stats
+
 def generalized_esd_test(data, k, alpha=0.05):
     """
     Using Generalized ESD Test to detect at most K anomalies
