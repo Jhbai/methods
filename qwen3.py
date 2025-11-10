@@ -94,6 +94,7 @@ class Qwen3Object:
         
         # ----- Auto Regressive生成 ----- #
         input_ids = input_ids[:, -1:]
+        yield "<think>"
         try:
             byte_buffer = b''
             for _ in range(32768):
