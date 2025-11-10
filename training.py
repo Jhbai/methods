@@ -17,7 +17,7 @@ def phase1_initial_training(model, train_loader, optimizer, epochs, device):
             optimizer.zero_grad()
             reconstructed, _ = model(data)
 
-            loss = nn.MSELoss()
+            loss = nn.MSELoss()(reconstructed, data)
             loss.backward()
             optimizer.step()
             loss_val += loss.item()
