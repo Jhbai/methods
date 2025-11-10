@@ -25,4 +25,4 @@ This is the method for solving every problems, most of my repos will be merged h
 
 00011_armv7
 
-00012_async_and_stream
+00012_fastapi_with_async_and_stream
