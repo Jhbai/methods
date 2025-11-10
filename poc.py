@@ -38,10 +38,10 @@ def generalized_esd_test(data, k, alpha=0.05):
 
         if r_calculated > lambda_critical:
             original_idx = np.where(data == x[max_residual_idx])[0][0]
-            outlier_indices.append(original_idx)
+            indices.append(original_idx)
             x.pop(max_residual_idx)
 
-    values = np.array(data)[outlier_indices]
+    values = np.array(data)[indices]
     return indices, values
 
   
