@@ -41,7 +41,9 @@ def generalized_esd_test(data, k, alpha=0.05):
         lambda_critical = (current_n - 1) * t_crit / np.sqrt((current_n - 2 + t_crit**2) * current_n)
 
         if r_calculated > lambda_critical:
-            original_idx = np.where(data == x[max_residual_idx])[0][0]
+            for original_idx in np.where(data == x[max_residual_idx])[0]:
+                if original_idx not in indices:
+                    break
             indices.append(original_idx)
             x.pop(max_residual_idx)
 
