@@ -45,7 +45,39 @@ class Gemma3Object:
 
         # ----- cache dictionary ----- #
         self.cache = CacheObject(history_len)
-        
+
+    def decision(self, prompt: str):
+        model = self.model
+        tokenizer = self.tokenizer
+        past_key_values = DynamicCache()
+
+        # ----- Prompt token產生 ----- #
+        MSG = self.msg.format(prompt=prompt)
+        input_ids = torch.tensor(tokenizer.encode(MSG)).to(model.device)
+        input_ids = input_ids.unsqueeze(0)
+        eos_token_ids = [tokenizer.eos_token_id, 106]
+
+        # ----- Prefill ----- #
+        chunks = torch.split(input_ids[:, :-1], 32, dim=-1)
+        st = 0
+        ed = 0
+        with torch.no_grad():
+            for chunk in chunks:
+                ed = st + chunk.shape[1]
+                outputs = model(input_ids=chunk, use_cache=True, past_key_values=past_key_values)
+                st = ed
+        input_ids = input_ids[:, -1:]
+
+        # ----- 取得True或False的Token機率 ----- #
+        """False, True : 4339, 9277"""
+        with torch.no_grad():
+            ed += 1
+            cache_position = torch.arange(ed-1, ed, dtype=torch.long, device = model.device)
+            outputs = model(input_ids=input_ids, use_cache=True, past_key_values=past_key_values, cache_position=cache_position)
+            logits = outputs.logits
+        decide = [9277, 4339][torch.argmax(logits[:, -1, [9277, 4339]], dim=-1, keepdim=False).item()]
+        return tokenizer.decode(decide)
+
     def predict(self, prompt: str, uid: str):
         # ----- Model & Tokenizer & past_key_values ----- #
         model = self.model
