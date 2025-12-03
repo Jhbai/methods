@@ -1,1 +1,1 @@
-gcc -o camera camera.c -lSDL2 -O2 -lm
+https://gemini.google.com/share/919cbf44e8b3
