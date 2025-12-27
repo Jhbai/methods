@@ -23,7 +23,16 @@ Third, modify the code in the llama_cpp_python python code
 
 Because when  trying to update the compiled llama_cpp_python package, it appears the latest version available is only 0.3.4. However, there are latent bugs within the coroutine and CUDA library implementations.
 
+# Service Command
+
+You can start your 127.0.0.1:8000 service by 
+```bash
+python -m llama_cpp.server --model "D:\LLM\coder\qwen2.5-coder-7b-instruct-q4_0.gguf" --n_gpu_layers -1 --host 0.0.0.0 --port 8000 --chat_format qwen-agent --n_ctx 10000
+```
+
 # LangChain
+
+The LangChain Code you can use for testing:
 
 ```python
 import os
