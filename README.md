@@ -18,3 +18,7 @@ Third, modify the code in the llama_cpp_python python code
 (3) Move cublas64_12.dll, cublasLt64_12.dll, cudart64_12.dll to "{path}\{venv}\Library\bin"
 
 (4) Modify the code in "{path}\{venv}\Lib\site-packages\llama_cpp", where the code is in this repo (just copy paste)
+
+# Reason for doing this
+
+Because when  trying to update the compiled llama_cpp_python package, it appears the latest version available is only 0.3.4. However, there are latent bugs within the coroutine and CUDA library implementations.
