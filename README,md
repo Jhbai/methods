@@ -1,8 +1,10 @@
-# It's a demo test in windows(for desktop/laptop testing in most of users' enviroment, so instead of linux, there are some more problems to fix). 
-# First of all, pip install the "compiled version" of llama_cpp_python for windows(since assembly/machine code is within the same platform)
-# Second, install the cuda toolkits and move them to the venv where you run your code
-# Third, modify the code in the llama_cpp_python python code
+* Description
+It's a demo test in windows(for desktop/laptop testing in most of users' enviroment, so instead of linux, there are some more problems to fix). 
+First of all, pip install the "compiled version" of llama_cpp_python for windows(since assembly/machine code is within the same platform)
+Second, install the cuda toolkits and move them to the venv where you run your code
+Third, modify the code in the llama_cpp_python python code
 
+* Example of SOP
 (1) Run "pip install llama-cpp-python --index-url https://abetlen.github.io/llama-cpp-python/whl/cu123 --extra-index-url https://pypi.tuna.tsinghua.edu.cn/simple --prefer-binary --no-cache-dir --force-reinstall"
 (2) Go to "https://developer.nvidia.com/cuda-12-4-0-download-archive?target_os=Windows" and install the toolkits
 (3) Move cublas64_12.dll, cublasLt64_12.dll, cudart64_12.dll to "{path}\{venv}\Library\bin"
